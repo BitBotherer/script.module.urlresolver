@@ -1,5 +1,5 @@
 '''
-FlashX urlresolver plugin
+zettahost urlresolver plugin
 (C) 2015 by Bit
 based on 180upload by anilkuj
 
@@ -31,9 +31,9 @@ net = Net()
 #SET ERROR_LOGO# THANKS TO VOINAGE, BSTRDMKR, ELDORADO
 error_logo = os.path.join(common.addon_path, 'resources', 'images', 'redx.png')
 
-class FlashxResolver(Plugin, UrlResolver, PluginSettings):
+class ZettahostResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
-    name = "flashx"
+    name = "zettahost"
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -42,28 +42,28 @@ class FlashxResolver(Plugin, UrlResolver, PluginSettings):
 
     
     def get_media_url(self, host, media_id):
-        web_url = 'http://www.flashx.tv/embed-%s-720x480.html' % media_id
+        web_url = 'http://zettahost.tv/embed-%s-720x480.html' % media_id
        
         try:
             html = net.http_GET(web_url).content
             # Check for file not found
             if re.search('File Not Found', html):
                 common.addon.log_error(self.name + ' - File Not Found')
-                xbmc.executebuiltin('XBMC.Notification([B][COLOR white]Flashx[/COLOR][/B],[COLOR red]File has been deleted[/COLOR],8000,'+error_logo+')')
+                xbmc.executebuiltin('XBMC.Notification([B][COLOR white]zettahost[/COLOR][/B],[COLOR red]File has been deleted[/COLOR],8000,'+error_logo+')')
                 return self.unresolvable(code=1, msg='File Not Found') 
 
             #check for the packed data filename and extract it if
             #we do
-            packed = re.search('/table>.*?(eval.*?\)\)\))', html,re.DOTALL)
+
+            packed = re.search('id="player_code".*?(eval.*?\)\)\))', html,re.DOTALL)
             if packed:
                 js = jsunpack.unpack(packed.group(1))
-                #we now just have to extract the mp4 file: part
-                link = re.search('file\s*:\s*"(http://[^"]+mp4)', js.replace('\\',''))
-                
+                #we now just have to extract the file: part
+                link = re.search('file:"(.+?)"', js.replace('\\',''))
                 if link:
                     return link.group(1)
             #doesn't seem to have the usual format
-            raise Exception('Unable to resolve Flashx Link')            
+            raise Exception('Unable to resolve zettahost Link')            
 
         except urllib2.URLError, e:
             common.addon.log_error(self.name + ': got http error %d fetching %s' %
@@ -71,13 +71,13 @@ class FlashxResolver(Plugin, UrlResolver, PluginSettings):
             common.addon.show_small_popup('Error','Http error: '+str(e), 5000, error_logo)
             return self.unresolvable(code=3, msg=e)
         except Exception, e:
-            common.addon.log_error('**** Flashx Error occured: %s' % e)
-            common.addon.show_small_popup(title='[B][COLOR white]Flashx[/COLOR][/B]', msg='[COLOR red]%s[/COLOR]' % e, delay=5000, image=error_logo)
+            common.addon.log_error('**** zettahost Error occured: %s' % e)
+            common.addon.show_small_popup(title='[B][COLOR white]zettahost[/COLOR][/B]', msg='[COLOR red]%s[/COLOR]' % e, delay=5000, image=error_logo)
             return self.unresolvable(code=0, msg=e)
 
         
     def get_url(self, host, media_id):
-        return 'http://www.flashx.tv/%s.html' % media_id 
+        return 'http://www.zettahost.tv/%s' % media_id 
         
         
     def get_host_and_id(self, url):
@@ -94,6 +94,6 @@ class FlashxResolver(Plugin, UrlResolver, PluginSettings):
 
     def valid_url(self, url, host):
         if self.get_setting('enabled') == 'false': return False
-        return (re.match('http://(www.)?flashx.tv/' +
+        return (re.match('http://(www.)?zettahost.tv/' +
                          '[0-9A-Za-z]+', url) or
-                         'flashx' in host)
+                         'zettahost' in host)
