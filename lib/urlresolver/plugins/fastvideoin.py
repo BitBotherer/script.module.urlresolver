@@ -28,7 +28,6 @@ import re, urllib2, os, xbmcgui, xbmc
 net = Net()
 
 #SET ERROR_LOGO# THANKS TO VOINAGE, BSTRDMKR, ELDORADO
-error_logo = os.path.join(common.addon_path, 'resources', 'images', 'redx.png')
 
 #note this does both FastVideo.in and FastStream.in as they both point to the same site
 class fastvideoResolver(Plugin, UrlResolver, PluginSettings):
@@ -49,7 +48,6 @@ class fastvideoResolver(Plugin, UrlResolver, PluginSettings):
             # Check for file not found
             if re.search('File Not Found', html):
                 common.addon.log_error(self.name + ' - File Not Found')
-                xbmc.executebuiltin('XBMC.Notification([B][COLOR white]fastvideo[/COLOR][/B],[COLOR red]File has been deleted[/COLOR],8000,'+error_logo+')')
                 return self.unresolvable(code=1, msg='File Not Found')
 
             #we now just have to extract the file: part
